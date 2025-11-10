@@ -5,7 +5,7 @@ local CORE_FILE = LOCAL_PATH .. "Core.lua"
 local CHAMPIONS_LIST_FILE = LOCAL_PATH .. "Champions.lua"
 
 -- Option pour désactiver les mises à jour automatiques
-local AUTO_UPDATE = false -- Mettre à false pour désactiver
+local AUTO_UPDATE = true -- Mettre à false pour désactiver
 
 -- Liste des champions chargée dynamiquement depuis Champions.lua
 local CHAMPION_LIST = nil
