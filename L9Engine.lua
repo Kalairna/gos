@@ -1,5 +1,5 @@
 local AIO_FOLDER = "L9Engine"
-local BASE_URL = "https://raw.githubusercontent.com/Gos-Lua/gos/main/"
+local BASE_URL = "https://raw.githubusercontent.com/Kalairna/gos/main/"
 local LOCAL_PATH = COMMON_PATH .. AIO_FOLDER .. "/"
 local CORE_FILE = LOCAL_PATH .. "Core.lua"
 local CHAMPIONS_LIST_FILE = LOCAL_PATH .. "Champions.lua"
@@ -41,8 +41,9 @@ local function LoadChampionsList()
         -- Ajouter les champions à la liste des fichiers nécessaires
         for _, championName in ipairs(CHAMPION_LIST) do
             local scriptName = championName .. ".lua"
-            local scriptPath = LOCAL_PATH .. "Champions/" .. scriptName
-            needed[scriptPath] = "Champions/" .. scriptName
+            local localPath = LOCAL_PATH .. "Champions/" .. scriptName
+            -- Sur GitHub les fichiers sont à la racine, localement dans Champions/
+            needed[localPath] = scriptName
         end
         return true
     else
@@ -120,7 +121,7 @@ if AUTO_UPDATE then
 else
     print("[L9Engine] Mode: Mises à jour automatiques désactivées")
 end
-print("[L9Engine] Téléchargement depuis: https://github.com/Gos-Lua/gos")
+print("[L9Engine] Téléchargement depuis: https://github.com/Kalairna/gos")
 
 -- Charger la liste des champions en local si elle existe avant de télécharger
 if FileExists(CHAMPIONS_LIST_FILE) then
