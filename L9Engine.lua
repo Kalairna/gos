@@ -4,10 +4,7 @@ local LOCAL_PATH = COMMON_PATH .. AIO_FOLDER .. "/"
 local CORE_FILE = LOCAL_PATH .. "Core.lua"
 local CHAMPIONS_LIST_FILE = LOCAL_PATH .. "Champions.lua"
 
--- Option pour désactiver les mises à jour automatiques
-local AUTO_UPDATE = true -- Mettre à false pour désactiver
-
--- Liste des champions chargée dynamiquement depuis Champions.lua
+local AUTO_UPDATE = false
 local CHAMPION_LIST = nil
 
 local needed = {
@@ -38,11 +35,9 @@ local function LoadChampionsList()
     local success, championsList = pcall(dofile, CHAMPIONS_LIST_FILE)
     if success and type(championsList) == "table" then
         CHAMPION_LIST = championsList
-        -- Ajouter les champions à la liste des fichiers nécessaires
         for _, championName in ipairs(CHAMPION_LIST) do
             local scriptName = championName .. ".lua"
             local localPath = LOCAL_PATH .. "Champions/" .. scriptName
-            -- Sur GitHub les fichiers sont à la racine, localement dans Champions/
             needed[localPath] = scriptName
         end
         return true
@@ -68,7 +63,6 @@ local function CheckAndDownload()
                 print(string.format("[L9Engine] %s mis à jour", shortName))
             end)
         else
-            -- Mode local uniquement
             if not FileExists(fullPath) then
                 print(string.format("[L9Engine] Téléchargement de %s depuis GitHub...", shortName))
                 Download(BASE_URL .. shortName, fullPath, function()
@@ -95,7 +89,6 @@ local function TryLoadCore()
     end
     if pendingDownloads > 0 then return end
     
-    -- Charger d'abord la liste des champions
     if not CHAMPION_LIST and FileExists(CHAMPIONS_LIST_FILE) then
         if LoadChampionsList() then
             print("[L9Engine] Liste des champions chargée: " .. #CHAMPION_LIST .. " champions disponibles")
@@ -123,7 +116,6 @@ else
 end
 print("[L9Engine] Téléchargement depuis: https://github.com/Kalairna/gos")
 
--- Charger la liste des champions en local si elle existe avant de télécharger
 if FileExists(CHAMPIONS_LIST_FILE) then
     LoadChampionsList()
 end
