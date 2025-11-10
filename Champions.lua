@@ -4,28 +4,17 @@
 
 return {
     "Aurora",
-    "Bard",
     "Braum",
-    "Kayn",
     "Kennen",
     "Leona",
-    "Lulu",
-    "MasterYi",
     "Naafiri",
-    "Nami",
-    "Nautilus",
-    "Nilah",
     "Pantheon",
     "Pyke",
-    "Qiyana",
     "Rell",
-    "Rengar",
     "Sylas",
     "Talon",
     "Thresh",
-    "Twitch",
     "XinZhao",
-    "Yasuo",
-    "Zed"
 }
+
 
