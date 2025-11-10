@@ -1,15 +1,11 @@
--- L9Engine compatibility guard
 if _G.__L9_ENGINE_AURORA_LOADED then return end
 _G.__L9_ENGINE_AURORA_LOADED = true
 
 local Version = 1.0
 local Name = "L9Aurora"
 
--- Hero validation
 local Heroes = {"Aurora"}
 if not table.contains(Heroes, myHero.charName) then return end
-
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
@@ -29,7 +25,6 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Spell Predictions
 local QPrediction = GGPrediction:SpellPrediction({
     Type = GGPrediction.SPELLTYPE_LINE,
     Delay = 0.25,
@@ -73,6 +68,15 @@ local RPrediction = GGPrediction:SpellPrediction({
 local HITCHANCE_NORMAL = 2
 local HITCHANCE_HIGH = 3
 local HITCHANCE_IMMOBILE = 4
+
+local function IsJungleMob(minion)
+    if not minion or not minion.charName then return false end
+    local name = minion.charName:lower()
+    return name:find("baron") or name:find("dragon") or name:find("sru_") or 
+           name:find("gromp") or name:find("krug") or name:find("murkwolf") or 
+           name:find("razorbeak") or name:find("red") or name:find("blue") or
+           name:find("crab") or name:find("rift")
+end
 
 class "L9Aurora"
 
@@ -145,7 +149,6 @@ function L9Aurora:Tick()
         self:Clear()
         self:JungleClear()
     elseif Mode == "LastHit" then
-        -- LastHit not implemented for Aurora
     end
     
     self:KillSteal()
@@ -157,7 +160,6 @@ function L9Aurora:Combo()
     if target == nil then return end
     
     if _G.L9Engine:IsValidEnemy(target) then
-        -- R Logic (Ultimate)
         if myHero.pos:DistanceTo(target.pos) <= 700 and self.Menu.Combo.UseR:Value() and _G.L9Engine:IsSpellReady(_R) then
             RPrediction:GetPrediction(target, myHero)
             if RPrediction:CanHit(self.Menu.Combo.RHitChance:Value()) then
@@ -165,7 +167,6 @@ function L9Aurora:Combo()
             end
         end
         
-        -- Q Logic
         if myHero.pos:DistanceTo(target.pos) <= 900 and self.Menu.Combo.UseQ:Value() and _G.L9Engine:IsSpellReady(_Q) then
             QPrediction:GetPrediction(target, myHero)
             if QPrediction:CanHit(self.Menu.Combo.QHitChance:Value()) then
@@ -173,7 +174,6 @@ function L9Aurora:Combo()
             end
         end
         
-        -- E Logic
         if myHero.pos:DistanceTo(target.pos) <= 825 and self.Menu.Combo.UseE:Value() and _G.L9Engine:IsSpellReady(_E) then
             EPrediction:GetPrediction(target, myHero)
             if EPrediction:CanHit(self.Menu.Combo.EHitChance:Value()) then
@@ -181,7 +181,6 @@ function L9Aurora:Combo()
             end
         end
         
-        -- W Logic (Shield)
         if myHero.pos:DistanceTo(target.pos) <= 450 and self.Menu.Combo.UseW:Value() and _G.L9Engine:IsSpellReady(_W) then
             WPrediction:GetPrediction(target, myHero)
             if WPrediction:CanHit(HITCHANCE_NORMAL) then
@@ -189,7 +188,6 @@ function L9Aurora:Combo()
             end
         end
         
-        -- Auto Attack
         if myHero.pos:DistanceTo(target.pos) <= 175 and _G.SDK and _G.SDK.Orbwalker:CanAttack() then
             Control.Attack(target)
         end
@@ -201,8 +199,6 @@ function L9Aurora:Harass()
     if target == nil then return end
     
     if _G.L9Engine:IsValidEnemy(target) and myHero.mana/myHero.maxMana >= self.Menu.Harass.Mana:Value() / 100 then
-        
-        -- Q Logic
         if myHero.pos:DistanceTo(target.pos) <= 900 and self.Menu.Harass.UseQ:Value() and _G.L9Engine:IsSpellReady(_Q) then
             QPrediction:GetPrediction(target, myHero)
             if QPrediction:CanHit(self.Menu.Harass.QHitChance:Value()) then
@@ -210,7 +206,6 @@ function L9Aurora:Harass()
             end
         end
         
-        -- E Logic
         if myHero.pos:DistanceTo(target.pos) <= 825 and self.Menu.Harass.UseE:Value() and _G.L9Engine:IsSpellReady(_E) then
             EPrediction:GetPrediction(target, myHero)
             if EPrediction:CanHit(self.Menu.Harass.EHitChance:Value()) then
@@ -224,9 +219,7 @@ function L9Aurora:Clear()
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
         
-        if myHero.pos:DistanceTo(minion.pos) <= 900 and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and myHero.mana/myHero.maxMana >= self.Menu.Clear.Mana:Value() / 100 then
-            
-            -- Q Logic
+        if myHero.pos:DistanceTo(minion.pos) <= 900 and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and not IsJungleMob(minion) and myHero.mana/myHero.maxMana >= self.Menu.Clear.Mana:Value() / 100 then
             if myHero.pos:DistanceTo(minion.pos) <= 900 and _G.L9Engine:IsSpellReady(_Q) and self.Menu.Clear.UseQ:Value() then
                 QPrediction:GetPrediction(minion, myHero)
                 if QPrediction:CanHit(HITCHANCE_NORMAL) then
@@ -235,7 +228,6 @@ function L9Aurora:Clear()
                 end
             end
             
-            -- E Logic
             if myHero.pos:DistanceTo(minion.pos) <= 825 and _G.L9Engine:IsSpellReady(_E) and self.Menu.Clear.UseE:Value() then
                 EPrediction:GetPrediction(minion, myHero)
                 if EPrediction:CanHit(HITCHANCE_NORMAL) then
@@ -251,9 +243,7 @@ function L9Aurora:JungleClear()
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
         
-        if myHero.pos:DistanceTo(minion.pos) <= 900 and minion.team == TEAM_JUNGLE and _G.L9Engine:IsValidEnemy(minion) and myHero.mana/myHero.maxMana >= self.Menu.JClear.Mana:Value() / 100 then
-            
-            -- Q Logic
+        if myHero.pos:DistanceTo(minion.pos) <= 900 and _G.L9Engine:IsValidEnemy(minion) and IsJungleMob(minion) and myHero.mana/myHero.maxMana >= self.Menu.JClear.Mana:Value() / 100 then
             if myHero.pos:DistanceTo(minion.pos) <= 900 and _G.L9Engine:IsSpellReady(_Q) and self.Menu.JClear.UseQ:Value() then
                 QPrediction:GetPrediction(minion, myHero)
                 if QPrediction:CanHit(HITCHANCE_NORMAL) then
@@ -262,7 +252,6 @@ function L9Aurora:JungleClear()
                 end
             end
             
-            -- E Logic
             if myHero.pos:DistanceTo(minion.pos) <= 825 and _G.L9Engine:IsSpellReady(_E) and self.Menu.JClear.UseE:Value() then
                 EPrediction:GetPrediction(minion, myHero)
                 if EPrediction:CanHit(HITCHANCE_NORMAL) then
@@ -279,7 +268,6 @@ function L9Aurora:KillSteal()
     if target == nil then return end
     
     if _G.L9Engine:IsValidEnemy(target) then
-        -- R KillSteal
         if self.Menu.ks.UseR:Value() and _G.L9Engine:IsSpellReady(_R) and myHero.pos:DistanceTo(target.pos) <= 700 then
             local RDmg = getdmg("R", target, myHero) or 0
             if target.health <= RDmg then
@@ -290,7 +278,6 @@ function L9Aurora:KillSteal()
             end
         end
         
-        -- Q KillSteal
         if self.Menu.ks.UseQ:Value() and _G.L9Engine:IsSpellReady(_Q) and myHero.pos:DistanceTo(target.pos) <= 900 then
             local QDmg = getdmg("Q", target, myHero) or 0
             if target.health <= QDmg then
@@ -301,7 +288,6 @@ function L9Aurora:KillSteal()
             end
         end
         
-        -- E KillSteal
         if self.Menu.ks.UseE:Value() and _G.L9Engine:IsSpellReady(_E) and myHero.pos:DistanceTo(target.pos) <= 825 then
             local EDmg = getdmg("E", target, myHero) or 0
             if target.health <= EDmg then

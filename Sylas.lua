@@ -1,15 +1,12 @@
--- L9Engine compatibility guard
 if _G.__L9_ENGINE_SYLAS_LOADED then return end
 _G.__L9_ENGINE_SYLAS_LOADED = true
 
 local Version = 1.0
 local Name = "L9Sylas"
 
--- Hero validation
 local Heroes = {"Sylas"}
 if not table.contains(Heroes, myHero.charName) then return end
 
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
@@ -29,7 +26,6 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Spell Predictions
 local QPrediction = GGPrediction:SpellPrediction({
     Type = GGPrediction.SPELLTYPE_LINE,
     Delay = 0.25,
@@ -51,6 +47,15 @@ local EPrediction = GGPrediction:SpellPrediction({
 local HITCHANCE_NORMAL = 2
 local HITCHANCE_HIGH = 3
 local HITCHANCE_IMMOBILE = 4
+
+local function IsJungleMob(minion)
+    if not minion or not minion.charName then return false end
+    local name = minion.charName:lower()
+    return name:find("baron") or name:find("dragon") or name:find("sru_") or 
+           name:find("gromp") or name:find("krug") or name:find("murkwolf") or 
+           name:find("razorbeak") or name:find("red") or name:find("blue") or
+           name:find("crab") or name:find("rift")
+end
 
 -- Fonction pour calculer les dégâts des sorts
 local function getdmg(spell, target, source)
@@ -236,7 +241,7 @@ function L9Sylas:LastHit()
         local minion = Game.Minion(i)
         local target = _G.L9Engine:GetBestTarget(1000)
         if target == nil then
-            if myHero.pos:DistanceTo(minion.pos) <= 800 and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and myHero.mana/myHero.maxMana >= self.Menu.Clear.Mana:Value() / 100 then
+            if myHero.pos:DistanceTo(minion.pos) <= 800 and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and not IsJungleMob(minion) and myHero.mana/myHero.maxMana >= self.Menu.Clear.Mana:Value() / 100 then
                 local count = _G.L9Engine:CountEnemyMinions(225)
                 local hp = minion.health
                 local QDmg = getdmg("Q", minion, myHero) or 0
@@ -253,7 +258,7 @@ function L9Sylas:Clear()
         local minion = Game.Minion(i)
         local passiveBuff = _G.L9Engine:GetUnitBuff(myHero, "SylasPassiveAttack")
         
-        if myHero.pos:DistanceTo(minion.pos) <= 1300 and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and myHero.mana/myHero.maxMana >= self.Menu.Clear.Mana:Value() / 100 then
+        if myHero.pos:DistanceTo(minion.pos) <= 1300 and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and not IsJungleMob(minion) and myHero.mana/myHero.maxMana >= self.Menu.Clear.Mana:Value() / 100 then
             
             if myHero.pos:DistanceTo(minion.pos) <= 800 and myHero:GetSpellData(_E).name == "SylasE2" then
                 EPrediction:GetPrediction(minion, myHero)
@@ -283,7 +288,7 @@ function L9Sylas:JungleClear()
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
         
-        if myHero.pos:DistanceTo(minion.pos) <= 1300 and minion.team == TEAM_JUNGLE and _G.L9Engine:IsValidEnemy(minion) and myHero.mana/myHero.maxMana >= self.Menu.JClear.Mana:Value() / 100 then
+        if myHero.pos:DistanceTo(minion.pos) <= 1300 and _G.L9Engine:IsValidEnemy(minion) and IsJungleMob(minion) and myHero.mana/myHero.maxMana >= self.Menu.JClear.Mana:Value() / 100 then
             
             if myHero.pos:DistanceTo(minion.pos) <= 800 and myHero:GetSpellData(_E).name == "SylasE2" then
                 EPrediction:GetPrediction(minion, myHero)

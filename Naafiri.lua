@@ -7,7 +7,6 @@ local Name = "L9Naafiri"
 local Heroes = {"Naafiri"}
 if not table.contains(Heroes, myHero.charName) then return end
 
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
@@ -27,7 +26,6 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Spell Predictions
 local QPrediction = GGPrediction:SpellPrediction({
     Type = GGPrediction.SPELLTYPE_LINE,
     Delay = 0.25,
@@ -68,7 +66,15 @@ local HITCHANCE_NORMAL = 2
 local HITCHANCE_HIGH = 3
 local HITCHANCE_IMMOBILE = 4
 
--- Helper functions
+local function IsJungleMob(minion)
+    if not minion or not minion.charName then return false end
+    local name = minion.charName:lower()
+    return name:find("baron") or name:find("dragon") or name:find("sru_") or 
+           name:find("gromp") or name:find("krug") or name:find("murkwolf") or 
+           name:find("razorbeak") or name:find("red") or name:find("blue") or
+           name:find("crab") or name:find("rift")
+end
+
 local function GetPackmatesCount()
     local count = 0
     for i = 1, Game.MinionCount() do
@@ -287,7 +293,7 @@ function L9Naafiri:LaneClear()
     local minions = {}
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
-        if minion and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and myHero.pos:DistanceTo(minion.pos) <= 1000 then
+        if minion and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and not IsJungleMob(minion) and myHero.pos:DistanceTo(minion.pos) <= 1000 then
             table.insert(minions, minion)
         end
     end
@@ -355,7 +361,7 @@ function L9Naafiri:JungleClear()
     
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
-        if minion and minion.team == TEAM_JUNGLE and _G.L9Engine:IsValidEnemy(minion) and myHero.pos:DistanceTo(minion.pos) <= 1000 then
+        if minion and _G.L9Engine:IsValidEnemy(minion) and IsJungleMob(minion) and myHero.pos:DistanceTo(minion.pos) <= 1000 then
             
             -- E - AoE damage
             if self.Menu.JClear.UseE:Value() and _G.L9Engine:IsSpellReady(_E) then

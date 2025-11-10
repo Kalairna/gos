@@ -7,7 +7,6 @@ local Name = "L9Rell"
 local Heroes = {"Rell"}
 if not table.contains(Heroes, myHero.charName) then return end
 
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
@@ -26,12 +25,11 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Rell spell ranges and properties
 local SPELL_RANGE = {
-    Q = 600,   -- Shattering Strike
-    W = 600,   -- Ferromancy: Mount Up / Crash Down
-    E = 400,   -- Attract and Repel
-    R = 500    -- Magnet Storm
+    Q = 600,
+    W = 600,
+    E = 400,
+    R = 500
 }
 
 local SPELL_SPEED = {

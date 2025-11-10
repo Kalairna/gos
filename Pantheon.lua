@@ -1,4 +1,3 @@
--- L9Engine compatibility guard
 if _G.__L9_ENGINE_PANTHEON_LOADED then return end
 _G.__L9_ENGINE_PANTHEON_LOADED = true
 
@@ -30,7 +29,6 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Helper function to detect jungle monsters
 local function IsJungleMob(minion)
     if not minion or not minion.charName then return false end
     local name = minion.charName:lower()
@@ -40,11 +38,10 @@ local function IsJungleMob(minion)
            name:find("crab") or name:find("rift")
 end
 
--- Pantheon spell ranges and properties
 local SPELL_RANGE = {
-    Q = 600,  -- Q mélée uniquement (pas de version chargée)
-    W = 600,  -- Shield Vault
-    E = 400   -- Aegis Assault
+    Q = 600,
+    W = 600,
+    E = 400
 }
 
 local SPELL_SPEED = {

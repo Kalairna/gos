@@ -1,15 +1,12 @@
--- L9Engine compatibility guard
 if _G.__L9_ENGINE_PYKE_LOADED then return end
 _G.__L9_ENGINE_PYKE_LOADED = true
 
 local Version = 1.0
 local Name = "L9Pyke"
 
--- Hero validation
 local Heroes = {"Pyke"}
 if not table.contains(Heroes, myHero.charName) then return end
 
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
@@ -29,7 +26,6 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Spell Predictions
 local QPrediction = GGPrediction:SpellPrediction({
     Type = GGPrediction.SPELLTYPE_LINE,
     Delay = 0.25,
@@ -62,6 +58,15 @@ local RPrediction = GGPrediction:SpellPrediction({
 local HITCHANCE_NORMAL = 2
 local HITCHANCE_HIGH = 3
 local HITCHANCE_IMMOBILE = 4
+
+local function IsJungleMob(minion)
+    if not minion or not minion.charName then return false end
+    local name = minion.charName:lower()
+    return name:find("baron") or name:find("dragon") or name:find("sru_") or 
+           name:find("gromp") or name:find("krug") or name:find("murkwolf") or 
+           name:find("razorbeak") or name:find("red") or name:find("blue") or
+           name:find("crab") or name:find("rift")
+end
 
 local QCharging = false
 local QStartTime = 0
@@ -619,7 +624,7 @@ function L9Pyke:LaneClear()
     
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
-        if minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and myHero.pos:DistanceTo(minion.pos) <= 1100 then
+        if minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and not IsJungleMob(minion) and myHero.pos:DistanceTo(minion.pos) <= 1100 then
             
             if self.Menu.Clear.UseQ:Value() then
                 local act = myHero.activeSpell
@@ -671,7 +676,7 @@ function L9Pyke:JungleClear()
     
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
-        if minion.team == TEAM_JUNGLE and _G.L9Engine:IsValidEnemy(minion) and myHero.pos:DistanceTo(minion.pos) <= 1100 then
+        if _G.L9Engine:IsValidEnemy(minion) and IsJungleMob(minion) and myHero.pos:DistanceTo(minion.pos) <= 1100 then
             
             if self.Menu.JClear.UseQ:Value() then
                 local act = myHero.activeSpell

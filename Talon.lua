@@ -1,4 +1,3 @@
--- L9Engine compatibility guard
 if _G.__L9_ENGINE_TALON_LOADED then return end
 _G.__L9_ENGINE_TALON_LOADED = true
 
@@ -29,16 +28,15 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Talon spell ranges and properties
 local SPELL_RANGE = {
-    Q = 575,  -- Q dash range (melee reset AA range ~200)
-    W = 650,  -- Rake
-    R = 550   -- Shadow Assault
+    Q = 575,
+    W = 650,
+    R = 550
 }
 
 local SPELL_SPEED = {
-    W = 2300, -- Rake projectile speed
-    R = 20    -- R instantané
+    W = 2300,
+    R = 20
 }
 
 local SPELL_DELAY = {

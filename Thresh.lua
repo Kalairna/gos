@@ -7,7 +7,6 @@ local Name = "L9Thresh"
 local Heroes = {"Thresh"}
 if not table.contains(Heroes, myHero.charName) then return end
 
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
@@ -27,7 +26,6 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Spell Predictions
 local QPrediction = GGPrediction:SpellPrediction({
     Type = GGPrediction.SPELLTYPE_LINE,
     Delay = 0.5,
@@ -51,6 +49,15 @@ local EPrediction = GGPrediction:SpellPrediction({
 local HITCHANCE_NORMAL = 2
 local HITCHANCE_HIGH = 3
 local HITCHANCE_IMMOBILE = 4
+
+local function IsJungleMob(minion)
+    if not minion or not minion.charName then return false end
+    local name = minion.charName:lower()
+    return name:find("baron") or name:find("dragon") or name:find("sru_") or 
+           name:find("gromp") or name:find("krug") or name:find("murkwolf") or 
+           name:find("razorbeak") or name:find("red") or name:find("blue") or
+           name:find("crab") or name:find("rift")
+end
 
 class "L9Thresh"
 
@@ -177,7 +184,7 @@ function L9Thresh:LaneClear()
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
         
-        if myHero.pos:DistanceTo(minion.pos) <= 400 and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and myHero.mana/myHero.maxMana >= self.Menu.Clear.Mana:Value() / 100 then
+        if myHero.pos:DistanceTo(minion.pos) <= 400 and minion.team == TEAM_ENEMY and _G.L9Engine:IsValidEnemy(minion) and not IsJungleMob(minion) and myHero.mana/myHero.maxMana >= self.Menu.Clear.Mana:Value() / 100 then
             
             if myHero.pos:DistanceTo(minion.pos) <= 400 and _G.L9Engine:IsSpellReady(_E) and self.Menu.Clear.UseE:Value() then
                 EPrediction:GetPrediction(minion, myHero)
@@ -204,7 +211,7 @@ function L9Thresh:JungleClear()
     for i = 1, Game.MinionCount() do
         local minion = Game.Minion(i)
         
-        if myHero.pos:DistanceTo(minion.pos) <= 400 and minion.team == TEAM_JUNGLE and _G.L9Engine:IsValidEnemy(minion) and myHero.mana/myHero.maxMana >= self.Menu.JClear.Mana:Value() / 100 then
+        if myHero.pos:DistanceTo(minion.pos) <= 400 and _G.L9Engine:IsValidEnemy(minion) and IsJungleMob(minion) and myHero.mana/myHero.maxMana >= self.Menu.JClear.Mana:Value() / 100 then
             
             if myHero.pos:DistanceTo(minion.pos) <= 400 and _G.L9Engine:IsSpellReady(_E) and self.Menu.JClear.UseE:Value() then
                 EPrediction:GetPrediction(minion, myHero)

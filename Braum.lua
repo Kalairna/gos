@@ -7,7 +7,6 @@ local Name = "L9Braum"
 local Heroes = {"Braum"}
 if not table.contains(Heroes, myHero.charName) then return end
 
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
@@ -26,12 +25,11 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Braum spell ranges and properties
 local SPELL_RANGE = {
-    Q = 1000,  -- Winter's Bite
-    W = 650,   -- Stand Behind Me
-    E = 0,     -- Unbreakable (self)
-    R = 1200   -- Glacial Fissure
+    Q = 1000,
+    W = 650,
+    E = 0,
+    R = 1200
 }
 
 local SPELL_SPEED = {
@@ -49,7 +47,6 @@ local SPELL_RADIUS = {
     R = 200
 }
 
--- Spell Predictions
 local QPrediction = GGPrediction:SpellPrediction({
     Type = GGPrediction.SPELLTYPE_LINE,
     Delay = SPELL_DELAY.Q,
@@ -74,16 +71,13 @@ local HITCHANCE_NORMAL = 2
 local HITCHANCE_HIGH = 3
 local HITCHANCE_IMMOBILE = 4
 
--- Helper function to check if ally is in combat
 local function IsAllyInCombat(ally)
     if not ally then return false end
     
-    -- Check if ally is attacking or being attacked
     for i = 1, Game.HeroCount() do
         local enemy = Game.Hero(i)
         if enemy and enemy.isEnemy and not enemy.dead then
             local distance = ally.pos:DistanceTo(enemy.pos)
-            -- Ally is in combat if enemy is close (within 1000 units)
             if distance <= 1000 then
                 return true
             end
@@ -93,29 +87,25 @@ local function IsAllyInCombat(ally)
     return false
 end
 
--- Helper function to check if target is stunned/immobilized (hard CC only)
 local function IsTargetStunned(target)
     if not target then return false end
     
-    -- List of slow/non-hard CC buff names to exclude
     local excludedBuffs = {
-        "braumqslow",          -- Braum Q slow
-        "slow",                -- Generic slow
-        "itemfrostcannonSlow", -- Items slow
-        "summonerexhaust",     -- Exhaust
-        "chilled",             -- Various slows
-        "cripple",             -- Attack speed slow
-        "wither",              -- Nasus W
+        "braumqslow",
+        "slow",
+        "itemfrostcannonSlow",
+        "summonerexhaust",
+        "chilled",
+        "cripple",
+        "wither",
     }
     
-    -- VERY STRICT - Only specific hard CC types AND check buff name
     for i = 0, target.buffCount do
         local buff = target:GetBuff(i)
         if buff and buff.count > 0 then
             local buffType = buff.type
             local buffName = (buff.name or ""):lower()
             
-            -- First check if it's in excluded list
             local isExcluded = false
             for _, excludedName in ipairs(excludedBuffs) do
                 if buffName:find(excludedName:lower()) then
@@ -125,13 +115,9 @@ local function IsTargetStunned(target)
                 end
             end
             
-            -- Only accept hard CC types AND not excluded
             if not isExcluded then
-                -- ONLY these specific types - NO SLOW (10)
-                -- 5=stun, 8=taunt, 11=snare/root, 21=knockup, 24=charm, 29=suppression
                 if buffType == 5 or buffType == 8 or buffType == 11 or 
                    buffType == 21 or buffType == 24 or buffType == 29 then
-                    -- Debug print with buff name
                     print("VALID Hard CC on " .. target.charName .. " - Type: " .. buffType .. " Name: " .. buffName)
                     return true
                 end
@@ -141,16 +127,14 @@ local function IsTargetStunned(target)
     return false
 end
 
--- Helper function to check if target is slowed
 local function IsTargetSlowed(target)
     if not target then return false end
     
-    -- Check if target has slow buff (type 10 ONLY)
     for i = 0, target.buffCount do
         local buff = target:GetBuff(i)
         if buff and buff.count > 0 then
             local buffType = buff.type
-            if buffType == 10 then -- 10 = slow
+            if buffType == 10 then
                 print("Slow detected on " .. target.charName .. " - Type: " .. buffType)
                 return true
             end
@@ -159,16 +143,13 @@ local function IsTargetSlowed(target)
     return false
 end
 
--- Helper function to check if being attacked by ranged enemies
 local function IsBeingAttackedByRanged()
     for i = 1, Game.HeroCount() do
         local enemy = Game.Hero(i)
         if enemy and enemy.isEnemy and _G.L9Engine:IsValidEnemy(enemy) then
             local distance = myHero.pos:DistanceTo(enemy.pos)
-            -- Check if enemy is ranged (attack range > 300) and close enough to be threatening
             local attackRange = enemy.attackRange or 125
             if attackRange > 300 and distance <= attackRange + 200 then
-                -- Check if enemy is facing us (simple check)
                 if distance <= 1000 then
                     return true
                 end
@@ -178,7 +159,6 @@ local function IsBeingAttackedByRanged()
     return false
 end
 
--- Helper function to detect jungle monsters
 local function IsJungleMob(minion)
     if not minion or not minion.charName then return false end
     local name = minion.charName:lower()
@@ -248,7 +228,6 @@ function L9Braum:Tick()
     
     if not CheckPredictionSystem() then return end
     
-    -- Only run auto play if enabled (optimization)
     if self.Menu.AutoPlay.AutoE:Value() then
         self:AutoE()
     end
@@ -280,7 +259,6 @@ function L9Braum:AutoE()
         return
     end
     
-    -- Simplified check - only check closest enemies for performance
     local target = _G.L9Engine:GetBestTarget(800)
     if target and _G.L9Engine:IsValidEnemy(target) then
         local attackRange = target.attackRange or 125
@@ -296,18 +274,15 @@ function L9Braum:AutoR()
         return
     end
     
-    -- Cooldown between R casts
     if Game.Timer() - self.lastRTime < 1.0 then
         return
     end
     
-    -- Check all enemies for HARD CC'd targets ONLY
     for i = 1, Game.HeroCount() do
         local enemy = Game.Hero(i)
         if enemy and enemy.isEnemy and _G.L9Engine:IsValidEnemy(enemy) then
             local distance = myHero.pos:DistanceTo(enemy.pos)
             if distance <= SPELL_RANGE.R then
-                -- ONLY check hard CC - NO SLOW CHECK AT ALL
                 if IsTargetStunned(enemy) then
                     RPrediction:GetPrediction(enemy, myHero)
                     if RPrediction:CanHit(HITCHANCE_NORMAL) then
@@ -327,7 +302,6 @@ function L9Braum:AutoW()
         return
     end
     
-    -- Check nearby allies for combat
     for i = 1, Game.HeroCount() do
         local ally = Game.Hero(i)
         if ally and ally.isAlly and not ally.isMe and not ally.dead then
@@ -350,7 +324,6 @@ function L9Braum:Combo()
     if _G.L9Engine:IsValidEnemy(target) then
         local distance = myHero.pos:DistanceTo(target.pos)
         
-        -- R for engage or multiple enemies
         if self.Menu.Combo.UseR:Value() and _G.L9Engine:IsSpellReady(_R) and distance <= SPELL_RANGE.R then
             local enemiesInRange = 0
             for i = 1, Game.HeroCount() do
@@ -371,7 +344,6 @@ function L9Braum:Combo()
             end
         end
         
-        -- Q for poke and slow
         if self.Menu.Combo.UseQ:Value() and _G.L9Engine:IsSpellReady(_Q) and distance <= SPELL_RANGE.Q then
             QPrediction:GetPrediction(target, myHero)
             if QPrediction:CanHit(self.Menu.Combo.QHitChance:Value()) then
@@ -380,14 +352,12 @@ function L9Braum:Combo()
             end
         end
         
-        -- E for defense when in combat
         if self.Menu.Combo.UseE:Value() and _G.L9Engine:IsSpellReady(_E) and distance <= 600 then
             if IsBeingAttackedByRanged() then
                 Control.CastSpell(HK_E)
             end
         end
         
-        -- W to allies in combat
         if self.Menu.Combo.UseW:Value() and _G.L9Engine:IsSpellReady(_W) then
             for i = 1, Game.HeroCount() do
                 local ally = Game.Hero(i)
@@ -475,7 +445,7 @@ function L9Braum:KillSteal()
         local distance = myHero.pos:DistanceTo(target.pos)
         
         if self.Menu.ks.UseR:Value() and _G.L9Engine:IsSpellReady(_R) and distance <= SPELL_RANGE.R then
-            if target.health <= 300 then -- Basic threshold
+            if target.health <= 300 then
                 RPrediction:GetPrediction(target, myHero)
                 if RPrediction:CanHit(HITCHANCE_HIGH) then
                     Control.CastSpell(HK_R, RPrediction.CastPosition)
@@ -485,7 +455,7 @@ function L9Braum:KillSteal()
         end
         
         if self.Menu.ks.UseQ:Value() and _G.L9Engine:IsSpellReady(_Q) and distance <= SPELL_RANGE.Q then
-            if target.health <= 200 then -- Basic threshold
+            if target.health <= 200 then
                 QPrediction:GetPrediction(target, myHero)
                 if QPrediction:CanHit(HITCHANCE_HIGH) then
                     Control.CastSpell(HK_Q, QPrediction.CastPosition)
@@ -515,7 +485,6 @@ function L9Braum:Draw()
         Draw.Circle(myHero.pos, SPELL_RANGE.R, 1, Draw.Color(255, 0, 0, 255))
     end
     
-    -- Draw auto play status (simplified for performance)
     if self.Menu.Drawing.DrawAutoStatus:Value() then
         local yOffset = 40
         local statusText = ""

@@ -7,7 +7,6 @@ local Name = "L9Leona"
 local Heroes = {"Leona"}
 if not table.contains(Heroes, myHero.charName) then return end
 
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
@@ -26,12 +25,11 @@ local function CheckPredictionSystem()
     return true
 end
 
--- Leona spell ranges and properties
 local SPELL_RANGE = {
-    Q = 200,   -- Shield of Daybreak (auto attack reset)
-    W = 300,   -- Eclipse (self-buff)
-    E = 700,   -- Zenith Blade
-    R = 1200   -- Solar Flare
+    Q = 200,
+    W = 300,
+    E = 700,
+    R = 1200
 }
 
 local SPELL_SPEED = {

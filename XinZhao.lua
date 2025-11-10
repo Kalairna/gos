@@ -8,7 +8,6 @@ local GitHubURL = "https://github.com/Gos-Lua/gos/blob/main/XinZhao.lua"
 local Heroes = {"XinZhao"}
 if not table.contains(Heroes, myHero.charName) then return end
 
--- Download and load GGPrediction
 if not FileExist(COMMON_PATH .. "GGPrediction.lua") then
     DownloadFileAsync(
         "https://raw.githubusercontent.com/gamsteron/GG/master/GGPrediction.lua",
