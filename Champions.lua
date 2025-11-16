@@ -3,7 +3,9 @@ return {
     "Thresh",
     "XinZhao",
     "Talon"
+    "Zeri"
 }
+
 
 
 
