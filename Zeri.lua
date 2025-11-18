@@ -1,7 +1,7 @@
 if _G.__L9_ENGINE_ZERI_LOADED then return end
 _G.__L9_ENGINE_ZERI_LOADED = true
 
-local Version = "1.0"
+local Version = "Credit to Zgjfjfl for his zeri"
 local Name = "L9Zeri"
 
 local Heroes = {"Zeri"}
