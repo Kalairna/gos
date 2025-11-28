@@ -2,10 +2,11 @@ return {
     "Sylas",
     "Thresh",
     "XinZhao",
-    "Talon"
-    "Zeri"
+    "Talon",
+    "Zeri",
     "Pantheon"
 }
+
 
 
 
