@@ -4,7 +4,9 @@ return {
     "XinZhao",
     "Talon"
     "Zeri"
+    "Pantheon"
 }
+
 
 
 
