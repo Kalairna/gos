@@ -4,7 +4,7 @@ local LOCAL_PATH = COMMON_PATH .. AIO_FOLDER .. "/"
 local CORE_FILE = LOCAL_PATH .. "Core.lua"
 local CHAMPIONS_LIST_FILE = LOCAL_PATH .. "Champions.lua"
 
-local AUTO_UPDATE = false
+local AUTO_UPDATE = true
 local CHAMPION_LIST = nil
 
 local needed = {
@@ -22,8 +22,10 @@ local pendingDownloads = 0
 local function Download(url, path, cb)
     pendingDownloads = pendingDownloads + 1
     DownloadFileAsync(url, path, function()
-        pendingDownloads = pendingDownloads - 1
-        if cb then cb(path) end
+        DelayAction(function()
+            pendingDownloads = pendingDownloads - 1
+            if cb then cb(path) end
+        end, 0.1)
     end)
 end
 
@@ -50,7 +52,7 @@ end
 local function EnsureDir()
     local championsPath = LOCAL_PATH .. "Champions/"
     if not FileExists(championsPath) then
-        print("[L9Engine] Création du dossier Champions...")
+        os.execute('mkdir "' .. championsPath .. '" 2>nul')
     end
 end
 
@@ -92,8 +94,14 @@ local function TryLoadCore()
     if not CHAMPION_LIST and FileExists(CHAMPIONS_LIST_FILE) then
         if LoadChampionsList() then
             print("[L9Engine] Liste des champions chargée: " .. #CHAMPION_LIST .. " champions disponibles")
+            if AUTO_UPDATE then
+                CheckAndDownload()
+                return
+            end
         end
     end
+    
+    if pendingDownloads > 0 then return end
     
     if not FileExists(CORE_FILE) then return end
     if SafeDofile(CORE_FILE) then
@@ -115,10 +123,6 @@ else
     print("[L9Engine] Mode: Mises à jour automatiques désactivées")
 end
 print("[L9Engine] Téléchargement depuis: https://github.com/Kalairna/gos")
-
-if FileExists(CHAMPIONS_LIST_FILE) then
-    LoadChampionsList()
-end
 
 CheckAndDownload()
 
